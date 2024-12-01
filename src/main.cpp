@@ -1,3 +1,13 @@
+/**
+ * @mainpage Blinkenstein - An Arduino program for controlling Ikkalebob's animatronic eyes
+ * @author dJPoida
+ * @see https://github.com/dJPoida/blinkenstein
+ * @date 2024-11-18
+ *
+ * @file main.cpp
+ * @brief Main setup and loop entry point for the Blinkenstein control code.
+ */
+
 #include <Arduino.h>
 #include <SPI.h>
 
@@ -7,8 +17,8 @@
 #include "stateManager.h"
 #include "debug.h"
 
-StateManager stateManager;
-InputHandler inputHandler(stateManager);
+InputHandler inputHandler;
+StateManager stateManager(inputHandler);
 ServoController servoController(stateManager);
 
 void setup() {
@@ -27,6 +37,9 @@ void setup() {
 void loop() {
     // Update input values
     inputHandler.update();
+
+    // Update state based on input values
+    stateManager.update();
 
     // Update servos based on state changes
     servoController.update();

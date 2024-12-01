@@ -10,26 +10,28 @@
 #ifndef STATE_MANAGER_H
 #define STATE_MANAGER_H
 
+#include <Arduino.h>
+#include "inputHandler.h"
+
 class StateManager {
 public:
-    StateManager();
+    StateManager(InputHandler& inputHandler);
 
-    void update(int joystickXPercent, int joystickYPercent, int potPercent, bool buttonPressed);
+    void update();
 
     int getPanState() const;
     int getTiltState() const;
-    int getLeftLidTopState() const;
-    int getLeftLidBottomState() const;
-    int getRightLidTopState() const;
-    int getRightLidBottomState() const;
+    int getTopLidState() const;
+    int getBottomLidState() const;
 
+    void printDebugValues();
 private:
+    InputHandler& inputHandler;
+
     int panState;
     int tiltState;
-    int leftLidTopState;
-    int leftLidBottomState;
-    int rightLidTopState;
-    int rightLidBottomState;
+    int topLidState;
+    int bottomLidState;
 };
 
 extern StateManager stateManager;

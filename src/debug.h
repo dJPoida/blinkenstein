@@ -9,8 +9,10 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#ifdef SERIAL_DEBUG
 #include <Arduino.h>
+#include "config.h"
+
+#ifdef SERIAL_DEBUG
 
 extern unsigned long previousDebugMillis;
 void printDebugValues();

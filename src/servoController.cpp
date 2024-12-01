@@ -1,14 +1,30 @@
+/**
+ * @file servoController.cpp
+ * @brief Controls the servo motors for the Blinkenstein project.
+ *
+ * This class manages the initialization and updating of servo motors,
+ * including setting their positions based on the current state.
+ */
+
 #include <Arduino.h>
 #include <Wire.h>
 #include "servoController.h"
 #include "config.h"
 
-ServoController::ServoController(StateManager& stateManager) 
-    : stateManager(stateManager), pwm(Adafruit_PWMServoDriver()), 
-      servoPanPulse(0), servoTiltPulse(0), servoLeftLidTopPulse(0), 
-      servoLeftLidBottomPulse(0), servoRightLidTopPulse(0), servoRightLidBottomPulse(0) 
+/**
+ * @brief Constructs a new ServoController object.
+ *
+ * @param stateManager Reference to the StateManager object.
+ */
+ServoController::ServoController(StateManager& stateManager)
+    : stateManager(stateManager), pwm(Adafruit_PWMServoDriver()),
+      servoPanPulse(0), servoTiltPulse(0), servoLeftLidTopPulse(0),
+      servoLeftLidBottomPulse(0), servoRightLidTopPulse(0), servoRightLidBottomPulse(0)
 {}
 
+/**
+ * @brief Initializes the servo controller.
+ */
 void ServoController::begin() {
     // Initialize I2C with specific SDA and SCL pins
     Wire.begin(PIN_SDA, PIN_SCL);
@@ -17,13 +33,17 @@ void ServoController::begin() {
     pwm.setPWMFreq(SERVO_PWM_FREQ);
 }
 
+/**
+ * @brief Updates the servo positions based on the current state.
+ */
 void ServoController::update() {
-    servoPanPulse = stateManager.getPanState();
-    servoTiltPulse = stateManager.getTiltState();
-    servoLeftLidTopPulse = stateManager.getLeftLidTopState();
-    servoLeftLidBottomPulse = stateManager.getLeftLidBottomState();
-    servoRightLidTopPulse = stateManager.getRightLidTopState();
-    servoRightLidBottomPulse = stateManager.getRightLidBottomState();
+    servoPanPulse = map(stateManager.getPanState() * -1, -100, 100, SERVO_PAN_MIN, SERVO_PAN_MAX);;
+    servoTiltPulse = map(stateManager.getTiltState() * -1, -100, 100, SERVO_TILT_MIN, SERVO_TILT_MAX);
+
+    servoLeftLidTopPulse = map(stateManager.getTopLidState(), 0, 100, SERVO_LEFT_LID_TOP_CLOSED, SERVO_LEFT_LID_TOP_OPEN);
+    servoLeftLidBottomPulse = map(stateManager.getBottomLidState(), 0, 100, SERVO_LEFT_LID_BOTTOM_CLOSED, SERVO_LEFT_LID_BOTTOM_OPEN);
+    servoRightLidTopPulse = map(stateManager.getTopLidState(), 0, 100, SERVO_RIGHT_LID_TOP_CLOSED, SERVO_RIGHT_LID_TOP_OPEN);
+    servoRightLidBottomPulse = map(stateManager.getBottomLidState(), 0, 100, SERVO_RIGHT_LID_BOTTOM_CLOSED, SERVO_RIGHT_LID_BOTTOM_OPEN);
 
     pwm.setPWM(SERVO_CHANNEL_PAN, 0, servoPanPulse);
     pwm.setPWM(SERVO_CHANNEL_TILT, 0, servoTiltPulse);
@@ -34,6 +54,9 @@ void ServoController::update() {
 }
 
 #ifdef SERIAL_DEBUG
+/**
+ * @brief Prints the current servo values for debugging purposes.
+ */
 void ServoController::printDebugValues() {
     char servoBuffer[256];
     snprintf(servoBuffer, sizeof(servoBuffer),

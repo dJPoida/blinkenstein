@@ -1,8 +1,15 @@
+/**
+ * @file inputHandler.cpp
+ * @brief Handles input from various hardware components such as joysticks, potentiometers, and buttons.
+ *
+ * This class reads input values from hardware components, processes them, and provides methods to access
+ * the current state of these inputs.
+ */
+
+#include <Arduino.h>
 #include "inputHandler.h"
 
-
-InputHandler::InputHandler(StateManager& stateManager):
-    stateManager(stateManager),
+InputHandler::InputHandler():
     joystickXValue(0),
     joystickYValue(0),
     potValue(0),
@@ -21,17 +28,19 @@ InputHandler::InputHandler(StateManager& stateManager):
 }
 
 /**
- * Updates the input values and notifies the state manager if any input has changed.
+ * @brief Update the input values and return true if any input has changed.
+ *
+ * @return true if any input has changed, false otherwise.
  */
-void InputHandler::update() {
+bool InputHandler::update() {
     readInputValues();
-    if (isJoystickXChanged() || isJoystickYChanged() || isPotValueChanged() || isButtonValueChanged()) {
-        stateManager.update(getJoystickXPercent(), getJoystickYPercent(), getPotPercent(), getButtonPressed());
-    }
+
+    return isJoystickXChanged() || isJoystickYChanged() || isPotValueChanged() || isButtonValueChanged();
 }
 
 /**
- * Checks if the joystick X value has changed.
+ * @brief Checks if the joystick X value has changed.
+ *
  * @return true if the joystick X value has changed, false otherwise.
  */
 bool InputHandler::isJoystickXChanged() const {
@@ -39,7 +48,8 @@ bool InputHandler::isJoystickXChanged() const {
 }
 
 /**
- * Checks if the joystick Y value has changed.
+ * @brief Checks if the joystick Y value has changed.
+ *
  * @return true if the joystick Y value has changed, false otherwise.
  */
 bool InputHandler::isJoystickYChanged() const {
@@ -47,7 +57,8 @@ bool InputHandler::isJoystickYChanged() const {
 }
 
 /**
- * Checks if the potentiometer value has changed.
+ * @brief Checks if the potentiometer value has changed.
+ *
  * @return true if the potentiometer value has changed, false otherwise.
  */
 bool InputHandler::isPotValueChanged() const {
@@ -55,7 +66,8 @@ bool InputHandler::isPotValueChanged() const {
 }
 
 /**
- * Checks if the button value has changed.
+ * @brief Checks if the button value has changed.
+ *
  * @return true if the button value has changed, false otherwise.
  */
 bool InputHandler::isButtonValueChanged() const {
@@ -63,7 +75,8 @@ bool InputHandler::isButtonValueChanged() const {
 }
 
 /**
- * Gets the current joystick X value.
+ * @brief Gets the current joystick X value.
+ *
  * @return the current joystick X value.
  */
 int InputHandler::getJoystickXValue() const {
@@ -71,7 +84,8 @@ int InputHandler::getJoystickXValue() const {
 }
 
 /**
- * Gets the current joystick X value as a percentage.
+ * @brief Gets the current joystick X value as a percentage.
+ *
  * @return the current joystick X value as a percentage.
  */
 int InputHandler::getJoystickXPercent() const {
@@ -79,7 +93,8 @@ int InputHandler::getJoystickXPercent() const {
 }
 
 /**
- * Gets the current joystick Y value.
+ * @brief Gets the current joystick Y value.
+ *
  * @return the current joystick Y value.
  */
 int InputHandler::getJoystickYValue() const {
@@ -87,7 +102,8 @@ int InputHandler::getJoystickYValue() const {
 }
 
 /**
- * Gets the current joystick Y value as a percentage.
+ * @brief Gets the current joystick Y value as a percentage.
+ *
  * @return the current joystick Y value as a percentage.
  */
 int InputHandler::getJoystickYPercent() const {
@@ -95,7 +111,8 @@ int InputHandler::getJoystickYPercent() const {
 }
 
 /**
- * Gets the current potentiometer value.
+ * @brief Gets the current potentiometer value.
+ *
  * @return the current potentiometer value.
  */
 int InputHandler::getPotValue() const {
@@ -103,7 +120,8 @@ int InputHandler::getPotValue() const {
 }
 
 /**
- * Gets the current potentiometer value as a percentage.
+ * @brief Gets the current potentiometer value as a percentage.
+ *
  * @return the current potentiometer value as a percentage.
  */
 int InputHandler::getPotPercent() const {
@@ -111,7 +129,8 @@ int InputHandler::getPotPercent() const {
 }
 
 /**
- * Gets the current button pressed state.
+ * @brief Gets the current button pressed state.
+ *
  * @return true if the button is pressed, false otherwise.
  */
 bool InputHandler::getButtonPressed() const {
@@ -119,7 +138,8 @@ bool InputHandler::getButtonPressed() const {
 }
 
 /**
- * Gets the smoothed potentiometer value.
+ * @brief Gets the smoothed potentiometer value.
+ *
  * @return the smoothed potentiometer value.
  */
 int InputHandler::getSmoothedPotValue() const {
@@ -127,7 +147,7 @@ int InputHandler::getSmoothedPotValue() const {
 }
 
 /**
- * Reads the input values from the hardware and updates the internal state.
+ * @brief Reads the input values from the hardware and updates the internal state.
  */
 void InputHandler::readInputValues() {
     prevJoystickXValue = joystickXValue;
@@ -151,11 +171,12 @@ void InputHandler::readInputValues() {
     joystickXValue = newJoystickXValue;
     joystickYValue = newJoystickYValue;
     potValue = newPotValue;
-    buttonValue = !(newButtonValue || newButtonValue2);
+    buttonValue = !newButtonValue || !newButtonValue2;
 }
 
 /**
- * Applies a deadzone to the joystick value.
+ * @brief Applies a deadzone to the joystick value.
+ *
  * @param value The joystick value.
  * @param deadzone The deadzone threshold.
  * @return The joystick value with the deadzone applied.
@@ -168,7 +189,7 @@ int InputHandler::applyDeadzone(int value, int deadzone) {
 }
 
 /**
- * Prints the current input values for debugging purposes.
+ * @brief Prints the current input values for debugging purposes.
  */
 void InputHandler::printDebugValues() {
     char inputBuffer[256];

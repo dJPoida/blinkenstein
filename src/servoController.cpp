@@ -37,7 +37,9 @@ void ServoController::begin() {
  * @brief Updates the servo positions based on the current state.
  */
 void ServoController::update() {
-    servoPanPulse = map(stateManager.getPanState() * -1, -100, 100, SERVO_PAN_MIN, SERVO_PAN_MAX);;
+    checkI2CConnection();
+
+    servoPanPulse = map(stateManager.getPanState() * -1, -100, 100, SERVO_PAN_MIN, SERVO_PAN_MAX);
     servoTiltPulse = map(stateManager.getTiltState() * -1, -100, 100, SERVO_TILT_MIN, SERVO_TILT_MAX);
 
     servoLeftLidTopPulse = map(stateManager.getTopLidState(), 0, 100, SERVO_LEFT_LID_TOP_CLOSED, SERVO_LEFT_LID_TOP_OPEN);
@@ -51,6 +53,22 @@ void ServoController::update() {
     pwm.setPWM(SERVO_CHANNEL_LEFT_LID_BOTTOM, 0, servoLeftLidBottomPulse);
     pwm.setPWM(SERVO_CHANNEL_RIGHT_LID_TOP, 0, servoRightLidTopPulse);
     pwm.setPWM(SERVO_CHANNEL_RIGHT_LID_BOTTOM, 0, servoRightLidBottomPulse);
+}
+
+/**
+ * @brief Checks the I2C connection and reinitializes if necessary.
+ */
+void ServoController::checkI2CConnection()
+{
+    // Check I2C connection by reading a register from the PWM driver
+    Wire.beginTransmission(SERVO_I2C_ADDRESS);
+    Wire.write(0x00); // Read mode register 1
+    if (Wire.endTransmission() != 0 || Wire.requestFrom(SERVO_I2C_ADDRESS, 1) != 1) {
+        // Attempt to reinitialize I2C if the connection is lost
+        Wire.begin(PIN_SDA, PIN_SCL);
+        pwm.begin();
+        pwm.setPWMFreq(SERVO_PWM_FREQ);
+    }
 }
 
 #ifdef SERIAL_DEBUG

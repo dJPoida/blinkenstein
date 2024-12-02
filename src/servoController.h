@@ -19,6 +19,7 @@ public:
 
     void begin();
     void update();
+    void checkI2CConnection();
     void printDebugValues();
 
 private:

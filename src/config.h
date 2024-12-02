@@ -25,13 +25,14 @@
 #define PIN_SCL 8               // I2C SCL
 
 // Servo PWM settings
+#define SERVO_I2C_ADDRESS 0x40  // Default PCA9685 I2C address
 #define SERVO_PWM_FREQ 60       // Analog servos run at ~60 Hz
 
 // Minimum and maximum pulse width for servos
 #define SERVO_PAN_MIN 270                   // Lower = more left, Higher = more right
 #define SERVO_PAN_MAX 520                   // Lower = more left, Higher = more right
-#define SERVO_TILT_MIN 350                  // Lower = more down, Higher = more up
-#define SERVO_TILT_MAX 580                  // Lower = more down, Higher = more up
+#define SERVO_TILT_MIN 180                  // Lower = more down, Higher = more up
+#define SERVO_TILT_MAX 380                  // Lower = more down, Higher = more up
 #define SERVO_LEFT_LID_TOP_OPEN 180         // Lower = more open, Higher = more closed
 #define SERVO_LEFT_LID_TOP_CLOSED 340       // Lower = more open, Higher = more closed
 #define SERVO_LEFT_LID_BOTTOM_OPEN 550      // Lower = more closed, Higher = more open

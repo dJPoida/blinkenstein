@@ -40,12 +40,12 @@ void StateManager::update() {
     int newTopLidState = buttonPressed ? 0 : potPercent;
     int newBottomLidState = buttonPressed ? 0 : potPercent;
 
-    if (newTiltState < 0 and newTopLidState > PUPIL_REVEAL_LID_MIN_AMOUNT and newTopLidState < PUPIL_REVEAL_LID_MAX_AMOUNT) {
+    if (newTiltState < 0 and newTopLidState > 0 and newTopLidState < PUPIL_REVEAL_LID_MAX_AMOUNT) {
         int offsetTopLidState = map(-newTiltState, 0, 100, PUPIL_REVEAL_LID_MIN_AMOUNT, PUPIL_REVEAL_LID_MAX_AMOUNT) - PUPIL_REVEAL_LID_MIN_AMOUNT;
         newTopLidState = constrain(newTopLidState + offsetTopLidState, 0, 100);
     }
 
-    if (newTiltState > 0 and newBottomLidState > PUPIL_REVEAL_LID_MIN_AMOUNT and newBottomLidState < PUPIL_REVEAL_LID_MAX_AMOUNT) {
+    if (newTiltState > 0 and newBottomLidState > 0 and newBottomLidState < PUPIL_REVEAL_LID_MAX_AMOUNT) {
         int offsetBottomLidState = map(-newTiltState, 0, 100, PUPIL_REVEAL_LID_MIN_AMOUNT, PUPIL_REVEAL_LID_MAX_AMOUNT) - PUPIL_REVEAL_LID_MIN_AMOUNT;
         newBottomLidState = constrain(newBottomLidState - offsetBottomLidState, 0, 100);
     }

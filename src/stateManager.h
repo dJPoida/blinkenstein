@@ -12,10 +12,11 @@
 
 #include <Arduino.h>
 #include "inputHandler.h"
+#include "brain.h"
 
 class StateManager {
 public:
-    StateManager(InputHandler& inputHandler);
+    StateManager(InputHandler& inputHandler, Brain& brain);
 
     void update();
 
@@ -27,13 +28,16 @@ public:
     void printDebugValues();
 private:
     InputHandler& inputHandler;
+    Brain& brain;
 
     int panState;
     int tiltState;
     int topLidState;
     int bottomLidState;
+
+    bool manualControl;
 };
 
 extern StateManager stateManager;
 
-#endif
+#endif // STATE_MANAGER_H

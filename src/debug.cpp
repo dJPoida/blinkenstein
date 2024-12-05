@@ -10,6 +10,7 @@
 #include "config.h"
 #include "servoController.h"
 #include "inputHandler.h"
+#include "brain.h"
 
 #ifdef SERIAL_DEBUG
 unsigned long previousDebugMillis;
@@ -24,6 +25,10 @@ void printDebugValues() {
 
         #if (DEBUG_INPUT == 1)
         inputHandler.printDebugValues();
+        #endif
+
+        #if (DEBUG_BRAIN == 1)
+        brain.printDebugValues();
         #endif
 
         #if (DEBUG_STATE == 1)

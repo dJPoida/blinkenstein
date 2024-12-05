@@ -34,6 +34,8 @@ public:
     bool getButtonPressed() const;
     int getSmoothedPotValue() const;
 
+    unsigned long getTimeSinceLastInput() const;
+
     void printDebugValues();
 
 private:
@@ -47,6 +49,9 @@ private:
     int prevPotValue;
     int smoothedPotValue;
     bool prevButtonValue;
+
+    unsigned long timeSinceLastInput;
+    unsigned long timeSinceLastInputMillis;
 
     void readInputValues();
     int applyDeadzone(int value, int deadzone);

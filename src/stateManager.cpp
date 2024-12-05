@@ -8,48 +8,68 @@
  */
 
 #include <Arduino.h>
+#include "stateManager.h"
 #include "config.h"
-#include "StateManager.h"
+#include "brain.h"
 
 /**
  * @brief Constructs a new StateManager object.
  *
  * @param inputHandler Reference to the InputHandler object.
+ * @param brain Reference to the Brain object.
  */
-StateManager::StateManager(InputHandler& inputHandler)
-    : inputHandler(inputHandler), panState(0), tiltState(0), topLidState(0), bottomLidState(0)
+StateManager::StateManager(InputHandler& inputHandler, Brain& brain):
+    inputHandler(inputHandler),
+    brain(brain),
+    panState(0),
+    tiltState(0),
+    topLidState(0),
+    bottomLidState(0)
 {}
 
-
 /**
- * @brief Updates the state based on the current input values.
- *
- * @todo eventually this will be an update based on the user inputs OR the autonomous brain control
+ * @brief Updates the state based on the current input values or autonomous control.
  */
 void StateManager::update() {
-    // Get the current input values
-    int joystickXPercent = inputHandler.getJoystickXPercent();
-    int joystickYPercent = inputHandler.getJoystickYPercent();
-    int potPercent = inputHandler.getPotPercent();
-    bool buttonPressed = inputHandler.getButtonPressed();
+    int newPanState = panState;
+    int newTiltState = tiltState;
+    int newTopLidState = topLidState;
+    int newBottomLidState = bottomLidState;
 
-    int newPanState = joystickXPercent;
-    int newTiltState = joystickYPercent;
+    // Update the state based on the input values when under manual control
+    if (brain.isManualControlEnabled()) {
+        int joystickXPercent = inputHandler.getJoystickXPercent();
+        int joystickYPercent = inputHandler.getJoystickYPercent();
+        int potPercent = inputHandler.getPotPercent();
+        bool buttonPressed = inputHandler.getButtonPressed();
 
-    // Set the initial lid state based on the blink button or the potentiometer
-    int newTopLidState = buttonPressed ? 0 : potPercent;
-    int newBottomLidState = buttonPressed ? 0 : potPercent;
+        newPanState = joystickXPercent;
+        newTiltState = joystickYPercent;
 
+        // Set the initial lid state based on the blink button or the potentiometer
+        newTopLidState = buttonPressed ? 0 : potPercent;
+        newBottomLidState = buttonPressed ? 0 : potPercent;
+    }
+
+    // Update the state based on the brain
+    else {
+        newPanState = brain.getPanState();
+        newTiltState = brain.getTiltState();
+        newTopLidState = brain.getBlinkState() ? 0 : brain.getEyelidsState();
+        newBottomLidState = brain.getBlinkState() ? 0 : brain.getEyelidsState();
+    }
+
+    // Adjust the top and bottom lid states based on the tilt state
     if (newTiltState < 0 and newTopLidState > 0 and newTopLidState < PUPIL_REVEAL_LID_MAX_AMOUNT) {
         int offsetTopLidState = map(-newTiltState, 0, 100, PUPIL_REVEAL_LID_MIN_AMOUNT, PUPIL_REVEAL_LID_MAX_AMOUNT) - PUPIL_REVEAL_LID_MIN_AMOUNT;
         newTopLidState = constrain(newTopLidState + offsetTopLidState, 0, 100);
     }
-
     if (newTiltState > 0 and newBottomLidState > 0 and newBottomLidState < PUPIL_REVEAL_LID_MAX_AMOUNT) {
         int offsetBottomLidState = map(-newTiltState, 0, 100, PUPIL_REVEAL_LID_MIN_AMOUNT, PUPIL_REVEAL_LID_MAX_AMOUNT) - PUPIL_REVEAL_LID_MIN_AMOUNT;
         newBottomLidState = constrain(newBottomLidState - offsetBottomLidState, 0, 100);
     }
 
+    // Update the state
     panState = newPanState;
     tiltState = newTiltState;
     topLidState = newTopLidState;

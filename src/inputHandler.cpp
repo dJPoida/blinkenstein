@@ -18,7 +18,9 @@ InputHandler::InputHandler():
     prevJoystickYValue(0),
     prevPotValue(0),
     prevButtonValue(false),
-    smoothedPotValue(0)
+    smoothedPotValue(0),
+    timeSinceLastInput(MANUAL_CONTROL_ENABLED_DEFAULT ? 0 : MANUAL_CONTROL_TIMEOUT),
+    timeSinceLastInputMillis(0)
 {
     pinMode(PIN_BLINK_BUTTON, INPUT_PULLUP);
     pinMode(PIN_BLINK_BUTTON_2, INPUT_PULLUP);
@@ -155,23 +157,32 @@ void InputHandler::readInputValues() {
     prevPotValue = potValue;
     prevButtonValue = buttonValue;
 
+    // Read the Joystick Values
     int newJoystickXValue = constrain(analogRead(PIN_JOYSTICK_X) + JOYSTICK_DRIFT_ADUSTMENT_X, 0, 4095);
     int newJoystickYValue = constrain(analogRead(PIN_JOYSTICK_Y) + JOYSTICK_DRIFT_ADUSTMENT_Y, 0, 4095);
     // Apply deadzone
     newJoystickXValue = applyDeadzone(newJoystickXValue, JOYSTICK_DEADZONE);
     newJoystickYValue = applyDeadzone(newJoystickYValue, JOYSTICK_DEADZONE);
 
+    // Reat the Potentiometer Value
     int newPotValue = 4095 - constrain(analogRead(PIN_EYELIDS_POT), 0, 4095);
     int previousSmoothedPotValue = smoothedPotValue;
     smoothedPotValue = (SMOOTHING_FACTOR * newPotValue) + ((1 - SMOOTHING_FACTOR) * smoothedPotValue);
 
-    int newButtonValue = digitalRead(PIN_BLINK_BUTTON);
-    int newButtonValue2 = digitalRead(PIN_BLINK_BUTTON_2);
+    // Read the Button Value
+    int newButtonValue = !digitalRead(PIN_BLINK_BUTTON) || !digitalRead(PIN_BLINK_BUTTON_2);
 
+    // When the user triggers the blink button, capture that they are interacting with the device
+    if (newButtonValue != buttonValue) {
+        timeSinceLastInputMillis = millis();
+    }
+    timeSinceLastInput = millis() - timeSinceLastInputMillis;
+
+    // Update the input values
     joystickXValue = newJoystickXValue;
     joystickYValue = newJoystickYValue;
     potValue = newPotValue;
-    buttonValue = !newButtonValue || !newButtonValue2;
+    buttonValue = newButtonValue;
 }
 
 /**
@@ -186,6 +197,15 @@ int InputHandler::applyDeadzone(int value, int deadzone) {
         return 2048;
     }
     return value;
+}
+
+/**
+ * @brief Calculates the time since the last meaningful input.
+ *
+ * @return unsigned long The time in milliseconds since the last meaningful input.
+ */
+unsigned long InputHandler::getTimeSinceLastInput() const {
+    return timeSinceLastInput;
 }
 
 /**

@@ -18,7 +18,8 @@
 #include "debug.h"
 
 InputHandler inputHandler;
-StateManager stateManager(inputHandler);
+Brain brain(inputHandler);
+StateManager stateManager(inputHandler, brain);
 ServoController servoController(stateManager);
 
 void setup() {
@@ -29,6 +30,9 @@ void setup() {
     // Initialize the PCA9685 board
     servoController.begin();
 
+    // Initialize the brain
+    brain.begin();
+
     #ifdef SERIAL_DEBUG
     Serial.println("Setup complete. Starting loop...");
     #endif
@@ -37,6 +41,9 @@ void setup() {
 void loop() {
     // Update input values
     inputHandler.update();
+
+    // Think
+    brain.update();
 
     // Update state based on input values
     stateManager.update();

@@ -21,6 +21,7 @@
 StateManager::StateManager(InputHandler& inputHandler, Brain& brain):
     inputHandler(inputHandler),
     brain(brain),
+    powerState(1),
     panState(0),
     tiltState(0),
     topLidState(0),
@@ -77,6 +78,24 @@ void StateManager::update() {
 }
 
 /**
+ * @brief Sets the power state.
+ *
+ * @param state The new power state.
+ */
+void StateManager::setPowerState(int state) {
+    powerState = state;
+}
+
+/**
+ * @brief Gets the current power state.
+ *
+ * @return int The current power state.
+ */
+int StateManager::getPowerState() const {
+    return powerState;
+}
+
+/**
  * @brief Gets the current pan state.
  *
  * @return int The current pan state.
@@ -116,9 +135,13 @@ int StateManager::getBottomLidState() const {
  * @brief Prints the current input values for debugging purposes.
  */
 void StateManager::printDebugValues() {
-    char buffer[256];
-    snprintf(buffer, sizeof(buffer),
-            "STATE: [PAN: %4d | TILT: %4d | TOP LID: %4d | BOT LID: %4d] ",
-            panState, tiltState, topLidState, bottomLidState);
-    Serial.print(buffer);
+    if (powerState == 1) {
+        char buffer[256];
+        snprintf(buffer, sizeof(buffer),
+                "STATE: [PAN: %4d | TILT: %4d | TOP LID: %4d | BOT LID: %4d] ",
+                panState, tiltState, topLidState, bottomLidState);
+        Serial.print(buffer);
+    } else {
+        Serial.println("STATE: [POWER: OFF]");
+    }
 }

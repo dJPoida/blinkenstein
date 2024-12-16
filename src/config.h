@@ -11,12 +11,13 @@
 
 // Debug Config
 #define DEBUG_INTERVAL 50       // How often the debug information should be printed to the serial monitor (ms)
-#define DEBUG_INPUT     0       // Output the input values to the serial monitor
-#define DEBUG_BRAIN     1       // Output the brain values to the serial monitor
+#define DEBUG_INPUT     1       // Output the input values to the serial monitor
+#define DEBUG_BRAIN     0       // Output the brain values to the serial monitor
 #define DEBUG_STATE     1       // Output the state values to the serial monitor
 #define DEBUG_SERVOS    0       // Output the servo values to the serial monitor
 
 // ESP Pin definitions
+#define PIN_POWER_BUTTON 6      // Digital pin for Software Power (when charging, the ESP will be powered on, sotware power state prevents autonomous control)
 #define PIN_JOYSTICK_X 0        // Joystic X-axis
 #define PIN_JOYSTICK_Y 1        // Joystick Y-axis
 #define PIN_BLINK_BUTTON 10     // Digital pin for Primary Blink Button

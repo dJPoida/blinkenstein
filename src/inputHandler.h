@@ -38,6 +38,9 @@ public:
 
     void printDebugValues();
 
+    bool isPowerButtonPressed();
+    bool isPowerButtonDoublePressed();
+
 private:
     int joystickXValue;
     int joystickYValue;
@@ -52,6 +55,11 @@ private:
 
     unsigned long timeSinceLastInput;
     unsigned long timeSinceLastInputMillis;
+
+    bool powerButtonState;
+    unsigned long lastPowerButtonPressTime;
+    bool powerButtonPressed;
+    bool powerButtonDoublePressed;
 
     void readInputValues();
     int applyDeadzone(int value, int deadzone);

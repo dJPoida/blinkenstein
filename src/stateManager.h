@@ -20,6 +20,9 @@ public:
 
     void update();
 
+    int getPowerState() const;
+    void setPowerState(int state);
+
     int getPanState() const;
     int getTiltState() const;
     int getTopLidState() const;
@@ -29,6 +32,8 @@ public:
 private:
     InputHandler& inputHandler;
     Brain& brain;
+
+    int powerState;
 
     int panState;
     int tiltState;

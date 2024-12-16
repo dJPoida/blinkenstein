@@ -42,14 +42,23 @@ void loop() {
     // Update input values
     inputHandler.update();
 
-    // Think
-    brain.update();
+    // Check for double power button press
+    if (stateManager.getPowerState() && inputHandler.isPowerButtonDoublePressed()) {
+        stateManager.setPowerState(false);
+    } else if (!stateManager.getPowerState() && inputHandler.isPowerButtonPressed()) {
+        stateManager.setPowerState(true);
+    }
 
-    // Update state based on input values
-    stateManager.update();
+    if (stateManager.getPowerState()) {
+        // Think
+        brain.update();
 
-    // Update servos based on state changes
-    servoController.update();
+        // Update state based on input values
+        stateManager.update();
+
+        // Update servos based on state changes
+        servoController.update();
+    }
 
     // Output debug information
     #ifdef SERIAL_DEBUG

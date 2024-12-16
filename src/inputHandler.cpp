@@ -20,8 +20,17 @@ InputHandler::InputHandler():
     prevButtonValue(false),
     smoothedPotValue(0),
     timeSinceLastInput(MANUAL_CONTROL_ENABLED_DEFAULT ? 0 : MANUAL_CONTROL_TIMEOUT),
-    timeSinceLastInputMillis(0)
+    timeSinceLastInputMillis(0),
+    powerButtonState(false),
+    lastPowerButtonPressTime(0),
+    powerButtonDoublePressed(false)
 {
+    // This pin is attached tothe CKCS module K pin which when grounded will power off the charge module.
+    // However, when charging, the CKCS module will not power off the ESP32
+    // If the operater presses this button twice, we will use software to stop the code from running
+    // Under normal battery operated conditions, the CKCS module will power off the ESP32
+    pinMode(PIN_POWER_BUTTON, INPUT_PULLUP);
+
     pinMode(PIN_BLINK_BUTTON, INPUT_PULLUP);
     pinMode(PIN_BLINK_BUTTON_2, INPUT_PULLUP);
     pinMode(PIN_JOYSTICK_X, INPUT);
@@ -178,6 +187,20 @@ void InputHandler::readInputValues() {
     }
     timeSinceLastInput = millis() - timeSinceLastInputMillis;
 
+    bool newPowerButtonState = !digitalRead(PIN_POWER_BUTTON);
+
+    if (newPowerButtonState && !powerButtonState) {
+        powerButtonPressed = true;
+
+        unsigned long currentTime = millis();
+        if (currentTime - lastPowerButtonPressTime >= 100 && currentTime - lastPowerButtonPressTime <= 500) {
+            powerButtonDoublePressed = true;
+            powerButtonPressed = false;
+        }
+        lastPowerButtonPressTime = currentTime;
+    }
+    powerButtonState = newPowerButtonState;
+
     // Update the input values
     joystickXValue = newJoystickXValue;
     joystickYValue = newJoystickYValue;
@@ -209,12 +232,38 @@ unsigned long InputHandler::getTimeSinceLastInput() const {
 }
 
 /**
+ * @brief Checks if the power button is pressed.
+ *
+ * @return true if the power button is pressed, false otherwise.
+ */
+bool InputHandler::isPowerButtonPressed() {
+    if (powerButtonPressed) {
+        powerButtonPressed = false;
+        return true;
+    }
+    return false;
+}
+
+/**
+ * @brief Checks if the power button is double pressed.
+ *
+ * @return true if the power button is double pressed, false otherwise.
+ */
+bool InputHandler::isPowerButtonDoublePressed() {
+    if (powerButtonDoublePressed) {
+        powerButtonDoublePressed = false;
+        return true;
+    }
+    return false;
+}
+
+/**
  * @brief Prints the current input values for debugging purposes.
  */
 void InputHandler::printDebugValues() {
     char inputBuffer[256];
     snprintf(inputBuffer, sizeof(inputBuffer),
-            "INPUT: [JOY_X: %4d | JOY_Y: %4d | POT: %4d | BUTTON: %d] ",
-            joystickXValue, joystickYValue, potValue, buttonValue);
+            "INPUT: [JOY_X: %4d | JOY_Y: %4d | POT: %4d | BUTTON: %d | PWR: %d | PWR2: %d] ",
+            joystickXValue, joystickYValue, potValue, buttonValue, powerButtonPressed, powerButtonDoublePressed);
     Serial.print(inputBuffer);
 }

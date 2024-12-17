@@ -10,7 +10,7 @@
 #include "config.h"
 #include "servoController.h"
 #include "inputHandler.h"
-#include "brain.h"
+#include "stateManager.h"
 
 #ifdef SERIAL_DEBUG
 unsigned long previousDebugMillis;
@@ -27,10 +27,6 @@ void printDebugValues() {
         inputHandler.printDebugValues();
         #endif
 
-        #if (DEBUG_BRAIN == 1)
-        brain.printDebugValues();
-        #endif
-
         #if (DEBUG_STATE == 1)
         stateManager.printDebugValues();
         #endif
@@ -39,7 +35,9 @@ void printDebugValues() {
         servoController.printDebugValues();
         #endif
 
+        #if (DEBUG_INPUT == 1 || DEBUG_STATE == 1 || DEBUG_SERVOS == 1)
         Serial.println();
+        #endif
     }
 }
 #endif

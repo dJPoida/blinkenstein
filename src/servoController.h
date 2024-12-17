@@ -11,20 +11,20 @@
 
 #include <Adafruit_PWMServoDriver.h>
 #include "config.h"
-#include "stateManager.h"
 
 class ServoController {
 public:
-    ServoController(StateManager& stateManager);
+    ServoController();
 
     void begin();
-    void update();
+    void update(int panState, int tiltState, int topLidState, int bottomLidState);
     void checkI2CConnection();
+
+    #ifdef SERIAL_DEBUG
     void printDebugValues();
+    #endif
 
 private:
-    StateManager& stateManager;
-
     Adafruit_PWMServoDriver pwm;
 
     int servoPanPulse;

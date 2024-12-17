@@ -2,8 +2,28 @@
 
 Yet another arduino control codebase for the [Simplified 3D Printed Animatronic Dual Eye Mechanism](https://www.instructables.com/Simplified-3D-Printed-Animatronic-Dual-Eye-Mechani)
 
+## Capabilities & Features
+Manual Control
+  - Pan (Joystick X Axis )
+  - Tilt (Joystick Y Axis)
+  - Eyelid Control / Squint (Potentiometer)
+  - Blink (Button / Joystick Press Button)
+  - Soft Power (For when charging circuit is activated)
+Automated Control
+  - Take over after manual control timeout (MANUAL_CONTROL_TIMEOUT)
+  - Auto Power off after timeout (AUTO_POWER_OFF_TIMEOUT)
+  - Sleep before Auto Power Off
+  - Randomised behaviour
+    - 5x eyelid squint positions
+    - 5x eye tilt positions
+    - 7x eye pan positions
+    - Blink / Blink & Look direction change
+General
+  - Random eye position jitter to emulate realistic eye movement
+  - Automatic eyelid adjustment to ensure pupil visibility when tilting above or below eyelid position
+
 ## Development notes
-Much of this code was generated with the help of Github Co-Pilot in an attempt to better understand
+My intention was to generate much of this code with Github Co-Pilot in an attempt to better understand
 how LLMs integrate into IDEs and where the line between help and hinderance is.
 
 ## Hardware
@@ -16,7 +36,8 @@ how LLMs integrate into IDEs and where the line between help and hinderance is.
 
 ## Debugging
 To enable or disable debugging, comment or un-comment the `#define SERIAL_DEBUG` line in [config.h](src/config.h#L10)
+General messages are logged automatically. To continuously output the state of the StateManager, InputHandler or ServoController, set the define values for `DEBUG_STATE`, `DEBUG_INPUT` and `DEBUG_SERVOS` respectively.
 
 ## TODO
-- Add the circuit diagram to the codebase
+- Add the circuit diagram to the codebase and the `README.md`
 - Add photos to the `README.md`

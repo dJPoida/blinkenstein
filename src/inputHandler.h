@@ -16,44 +16,37 @@ class InputHandler {
 public:
     InputHandler();
 
-    bool update();
-
-    bool isJoystickXChanged() const;
-    bool isJoystickYChanged() const;
-    bool isPotValueChanged() const;
-    bool isButtonValueChanged() const;
+    void update();
 
     int getJoystickXValue() const;
     int getJoystickXPercent() const;
     int getJoystickYValue() const;
     int getJoystickYPercent() const;
-
     int getPotPercent() const;
     int getPotValue() const;
-
-    bool getButtonPressed() const;
     int getSmoothedPotValue() const;
+    bool getButtonPressed() const;
 
-    unsigned long getTimeSinceLastInput() const;
-
-    void printDebugValues();
+    bool isManualControlEnabled() const;
+    int getManualControlDisabledSinceMillis() const;
 
     bool isPowerButtonPressed();
     bool isPowerButtonDoublePressed();
+
+    #ifdef SERIAL_DEBUG
+    void printDebugValues();
+    #endif
 
 private:
     int joystickXValue;
     int joystickYValue;
     int potValue;
+    int smoothedPotValue;
     bool buttonValue;
 
-    int prevJoystickXValue;
-    int prevJoystickYValue;
-    int prevPotValue;
-    int smoothedPotValue;
-    bool prevButtonValue;
-
+    bool manualControlEnabled;
     unsigned long timeSinceLastInput;
+    unsigned long manualControlDisabledSinceMillis;
     unsigned long lastInputMillis;
     int lastAnalogInputChecksum;
 
@@ -63,6 +56,7 @@ private:
     bool powerButtonDoublePressed;
 
     void readInputValues();
+    void readPowerButton();
     int applyDeadzone(int value, int deadzone);
 };
 

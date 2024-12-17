@@ -5,15 +5,16 @@
  * This file contains various configuration settings, including debug options,
  * pin definitions, servo settings, and other constants used throughout the project.
  */
+#ifndef CONFIG_H
+#define CONFIG_H
 
 // Uncomment the following line to enable debug output
-// #define SERIAL_DEBUG
+#define SERIAL_DEBUG
 
 // Debug Config
-#define DEBUG_INTERVAL 50       // How often the debug information should be printed to the serial monitor (ms)
-#define DEBUG_INPUT     0       // Output the input values to the serial monitor
-#define DEBUG_BRAIN     0       // Output the brain values to the serial monitor
+#define DEBUG_INTERVAL  100     // How often the debug information should be printed to the serial monitor (ms)
 #define DEBUG_STATE     0       // Output the state values to the serial monitor
+#define DEBUG_INPUT     0       // Output the input values to the serial monitor
 #define DEBUG_SERVOS    0       // Output the servo values to the serial monitor
 
 // ESP Pin definitions
@@ -36,9 +37,9 @@
 #define SERVO_TILT_MIN 200                  // Lower = more down, Higher = more up
 #define SERVO_TILT_MAX 360                  // Lower = more down, Higher = more up
 #define SERVO_LEFT_LID_TOP_OPEN 180         // Lower = more open, Higher = more closed
-#define SERVO_LEFT_LID_TOP_CLOSED 340       // Lower = more open, Higher = more closed
+#define SERVO_LEFT_LID_TOP_CLOSED 320       // Lower = more open, Higher = more closed
 #define SERVO_LEFT_LID_BOTTOM_OPEN 550      // Lower = more closed, Higher = more open
-#define SERVO_LEFT_LID_BOTTOM_CLOSED 290    // Lower = more closed, Higher = more open
+#define SERVO_LEFT_LID_BOTTOM_CLOSED 280    // Lower = more closed, Higher = more open
 #define SERVO_RIGHT_LID_TOP_OPEN 600        // Lower = more closed, Higher = more open
 #define SERVO_RIGHT_LID_TOP_CLOSED 400      // Lower = more closed, Higher = more open
 #define SERVO_RIGHT_LID_BOTTOM_OPEN 250     // Lower = more open, Higher = more closed
@@ -65,20 +66,29 @@
 #define MANUAL_CONTROL_INTERRUPT_THRESHOLD 1000  // What change in value on the analog inputs will trigger manual control
 #define MANUAL_CONTROL_TIMEOUT 10000             // How long to wait before reverting to autonomous control (ms)
 
-#define BRAIN_UPDATE_INTERVAL 100               // How often the brain should consider changing the states (ms)
-#define BRAIN_MAX_CHANCE 100                    // The maximum chance value for random events
-#define BRAIN_CHANCE_OF_BLINK 2                 // The chance of performing a blink (0 -> BRAIN_MAX_CHANCE)
-#define BRAIN_CHANCE_OF_EYELID_CHANGE 1         // The chance of the eyelids changing (0 -> BRAIN_MAX_CHANCE)
-#define BRAIN_CHANCE_OF_MAJOR_LOOK_CHANGE 2     // The chance of the eyeballs changing direction slightly (0 -> BRAIN_MAX_CHANCE)
-#define BRAIN_CHANCE_OF_MINOR_LOOK_CHANGE 10    // The chance of the eyeballs changing direction in a large way (0 -> BRAIN_MAX_CHANCE)
-#define BRAIN_CHANCE_OF_LOOK_RETURN_CENTRE 25   // The chance of the eyeballs returning to the centre (0 -> BRAIN_MAX_CHANCE)
-#define BRAIN_CHANCE_OF_BLINK_WHILE_LOOK 25     // The chance of blinking while looking around (0 -> BRAIN_MAX_CHANCE)
+#define AUTO_POWER_OFF_TIMEOUT 300000            // How long to wait before powering down the bot (ms) due to inactivity
 
-// Pupeteering Settings
-// --------------------
+#define AUTO_UPDATE_INTERVAL 100               // How often the autonomous control should consider changing the states (ms)
+#define AUTO_MAX_CHANCE 1000                   // The maximum chance value for random events
+#define AUTO_CHANCE_OF_BLINK 15                // The chance of performing a blink (0 -> AUTO_MAX_CHANCE)
+#define AUTO_CHANCE_OF_EYELID_CHANGE 10        // The chance of the eyelids changing (0 -> AUTO_MAX_CHANCE)
+#define AUTO_CHANCE_OF_MAJOR_LOOK_CHANGE 20    // The chance of the eyeballs changing direction in a large way (0 -> AUTO_MAX_CHANCE)
+#define AUTO_CHANCE_OF_LOOK_RETURN_CENTRE 250  // The chance of the eyeballs returning to the centre (0 -> AUTO_MAX_CHANCE)
+#define AUTO_CHANCE_OF_BLINK_WHILE_LOOK 500    // The chance of blinking while looking around (0 -> AUTO_MAX_CHANCE)
+#define AUTO_SQUINT_POSITION_COUNT 5           // The number of eyelid squint positions to choose from
+#define AUTO_LOOK_PAN_POSITION_COUNT 7         // The number of eye pan positions to choose from
+#define AUTO_LOOK_TILT_POSITION_COUNT 5        // The number of eye tilt positions to choose from
+#define AUTO_BLINK_DURATION 150                // How long the blink should last (when under autonomous control) (ms)
+#define AUTO_CHANCE_OF_LOOK_TWITCH 5           // The chance of the eyeballs changing direction slightly to emulate realism (0 -> AUTO_MAX_CHANCE)
+#define AUTO_LOOK_TWITCH_AMOUNT 12             // The amount of twitch to apply to the eyeballs (0 -> 100)
+
+// Define auto positions
+const int AUTO_SQUINT_POSITIONS[AUTO_SQUINT_POSITION_COUNT] = {0, 25, 40, 60, 85};
+const int AUTO_LOOK_PAN_POSITIONS[AUTO_LOOK_PAN_POSITION_COUNT] = {-100, -75, -30, 0, 30, 75, 100};
+const int AUTO_LOOK_TILT_POSITIONS[AUTO_LOOK_TILT_POSITION_COUNT] = {-100, -50, 0, 50, 100};
 
 // Prevent the pupil from be obscured by the eyelids
 #define PUPIL_REVEAL_LID_MIN_AMOUNT 20
 #define PUPIL_REVEAL_LID_MAX_AMOUNT 58
 
-#define BLINK_DURATION 150                   // How long the blink should last (when the brain is in control) (ms)
+#endif // CONFIG_H

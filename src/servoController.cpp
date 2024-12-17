@@ -13,11 +13,9 @@
 
 /**
  * @brief Constructs a new ServoController object.
- *
- * @param stateManager Reference to the StateManager object.
  */
-ServoController::ServoController(StateManager& stateManager)
-    : stateManager(stateManager), pwm(Adafruit_PWMServoDriver()),
+ServoController::ServoController()
+    : pwm(Adafruit_PWMServoDriver()),
       servoPanPulse(0), servoTiltPulse(0), servoLeftLidTopPulse(0),
       servoLeftLidBottomPulse(0), servoRightLidTopPulse(0), servoRightLidBottomPulse(0)
 {}
@@ -35,17 +33,22 @@ void ServoController::begin() {
 
 /**
  * @brief Updates the servo positions based on the current state.
+ *
+ * @param panState The pan state.
+ * @param tiltState The tilt state.
+ * @param topLidState The top lid state.
+ * @param bottomLidState The bottom lid state.
  */
-void ServoController::update() {
+void ServoController::update(int panState, int tiltState, int topLidState, int bottomLidState) {
     checkI2CConnection();
 
-    servoPanPulse = map(stateManager.getPanState() * -1, -100, 100, SERVO_PAN_MIN, SERVO_PAN_MAX);
-    servoTiltPulse = map(stateManager.getTiltState() * -1, -100, 100, SERVO_TILT_MIN, SERVO_TILT_MAX);
+    servoPanPulse = map(panState * -1, -100, 100, SERVO_PAN_MIN, SERVO_PAN_MAX);
+    servoTiltPulse = map(tiltState * -1, -100, 100, SERVO_TILT_MIN, SERVO_TILT_MAX);
 
-    servoLeftLidTopPulse = map(stateManager.getTopLidState(), 0, 100, SERVO_LEFT_LID_TOP_CLOSED, SERVO_LEFT_LID_TOP_OPEN);
-    servoLeftLidBottomPulse = map(stateManager.getBottomLidState(), 0, 100, SERVO_LEFT_LID_BOTTOM_CLOSED, SERVO_LEFT_LID_BOTTOM_OPEN);
-    servoRightLidTopPulse = map(stateManager.getTopLidState(), 0, 100, SERVO_RIGHT_LID_TOP_CLOSED, SERVO_RIGHT_LID_TOP_OPEN);
-    servoRightLidBottomPulse = map(stateManager.getBottomLidState(), 0, 100, SERVO_RIGHT_LID_BOTTOM_CLOSED, SERVO_RIGHT_LID_BOTTOM_OPEN);
+    servoLeftLidTopPulse = map(topLidState, 0, 100, SERVO_LEFT_LID_TOP_CLOSED, SERVO_LEFT_LID_TOP_OPEN);
+    servoLeftLidBottomPulse = map(bottomLidState, 0, 100, SERVO_LEFT_LID_BOTTOM_CLOSED, SERVO_LEFT_LID_BOTTOM_OPEN);
+    servoRightLidTopPulse = map(topLidState, 0, 100, SERVO_RIGHT_LID_TOP_CLOSED, SERVO_RIGHT_LID_TOP_OPEN);
+    servoRightLidBottomPulse = map(bottomLidState, 0, 100, SERVO_RIGHT_LID_BOTTOM_CLOSED, SERVO_RIGHT_LID_BOTTOM_OPEN);
 
     pwm.setPWM(SERVO_CHANNEL_PAN, 0, servoPanPulse);
     pwm.setPWM(SERVO_CHANNEL_TILT, 0, servoTiltPulse);

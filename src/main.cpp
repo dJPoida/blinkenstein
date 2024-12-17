@@ -18,10 +18,12 @@
 #include "debug.h"
 
 InputHandler inputHandler;
-Brain brain(inputHandler);
-StateManager stateManager(inputHandler, brain);
-ServoController servoController(stateManager);
+ServoController servoController;
+StateManager stateManager(inputHandler);
 
+/**
+ * @brief Setup function for the Blinkenstein control code.
+ */
 void setup() {
     #ifdef SERIAL_DEBUG
     Serial.begin(115200);
@@ -30,35 +32,26 @@ void setup() {
     // Initialize the PCA9685 board
     servoController.begin();
 
-    // Initialize the brain
-    brain.begin();
+    // Initialize the state
+    stateManager.begin();
 
     #ifdef SERIAL_DEBUG
     Serial.println("Setup complete. Starting loop...");
     #endif
 }
 
+/**
+ * @brief Main loop for the Blinkenstein control code.
+ */
 void loop() {
-    // Update input values
+    // Update input values (needs to be done outside the stateManager to enable power control)
     inputHandler.update();
 
-    // Check for double power button press
-    if (stateManager.getPowerState() && inputHandler.isPowerButtonDoublePressed()) {
-        stateManager.setPowerState(false);
-    } else if (!stateManager.getPowerState() && inputHandler.isPowerButtonPressed()) {
-        stateManager.setPowerState(true);
-    }
+    // Update the state manager
+    stateManager.update();
 
-    if (stateManager.getPowerState()) {
-        // Think
-        brain.update();
-
-        // Update state based on input values
-        stateManager.update();
-
-        // Update servos based on state changes
-        servoController.update();
-    }
+    // Update the Servo Controller
+    servoController.update(stateManager.getPanState(), stateManager.getTiltState(), stateManager.getTopLidState(), stateManager.getBottomLidState());
 
     // Output debug information
     #ifdef SERIAL_DEBUG

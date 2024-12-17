@@ -14,17 +14,14 @@ InputHandler::InputHandler():
     joystickYValue(0),
     potValue(0),
     buttonValue(false),
-    prevJoystickXValue(0),
-    prevJoystickYValue(0),
-    prevPotValue(0),
-    prevButtonValue(false),
     smoothedPotValue(0),
-    timeSinceLastInput(MANUAL_CONTROL_ENABLED_DEFAULT ? MANUAL_CONTROL_TIMEOUT + 1 : 0),
+    timeSinceLastInput(0),
     lastInputMillis(0),
     lastAnalogInputChecksum(0),
     powerButtonState(false),
     lastPowerButtonPressTime(0),
-    powerButtonDoublePressed(false)
+    powerButtonDoublePressed(false),
+    manualControlEnabled(MANUAL_CONTROL_ENABLED_DEFAULT)
 {
     // This pin is attached tothe CKCS module K pin which when grounded will power off the charge module.
     // However, when charging, the CKCS module will not power off the ESP32
@@ -41,49 +38,92 @@ InputHandler::InputHandler():
 
 /**
  * @brief Update the input values and return true if any input has changed.
- *
- * @return true if any input has changed, false otherwise.
  */
-bool InputHandler::update() {
+void InputHandler::update() {
     readInputValues();
+    readPowerButton();
 
-    return isJoystickXChanged() || isJoystickYChanged() || isPotValueChanged() || isButtonValueChanged();
+    // Determine whether the user is manually controlling the input
+    // by checking if any analog input has changed within the manual control interrupt threshold
+    // or if the button is pressed
+    if (buttonValue || (abs(joystickXValue + joystickYValue + potValue - lastAnalogInputChecksum) > MANUAL_CONTROL_INTERRUPT_THRESHOLD)
+    ) {
+        lastAnalogInputChecksum = joystickXValue + joystickYValue + potValue;
+        lastInputMillis = millis();
+    }
+    timeSinceLastInput = millis() - lastInputMillis;
+
+    if (!manualControlEnabled && (timeSinceLastInput <= MANUAL_CONTROL_TIMEOUT)) {
+        #ifdef SERIAL_DEBUG
+        Serial.println("Input Handler: Manual Control");
+        #endif
+        manualControlEnabled = true;
+        manualControlDisabledSinceMillis = 0;
+    } else if (manualControlEnabled && (timeSinceLastInput > MANUAL_CONTROL_TIMEOUT)) {
+        #ifdef SERIAL_DEBUG
+        Serial.println("Input Handler: Autonomous Control");
+        #endif
+        manualControlEnabled = false;
+        manualControlDisabledSinceMillis = millis();
+    }
 }
 
 /**
- * @brief Checks if the joystick X value has changed.
- *
- * @return true if the joystick X value has changed, false otherwise.
+ * @brief Reads the input values from the hardware and updates the internal state.
  */
-bool InputHandler::isJoystickXChanged() const {
-    return joystickXValue != prevJoystickXValue;
+void InputHandler::readInputValues() {
+    // Read the Joystick Values
+    int newJoystickXValue = constrain(analogRead(PIN_JOYSTICK_X) + JOYSTICK_DRIFT_ADUSTMENT_X, 0, 4095);
+    int newJoystickYValue = constrain(analogRead(PIN_JOYSTICK_Y) + JOYSTICK_DRIFT_ADUSTMENT_Y, 0, 4095);
+    // Apply deadzone
+    newJoystickXValue = applyDeadzone(newJoystickXValue, JOYSTICK_DEADZONE);
+    newJoystickYValue = applyDeadzone(newJoystickYValue, JOYSTICK_DEADZONE);
+
+    // Reat the Potentiometer Value
+    int newPotValue = constrain(analogRead(PIN_EYELIDS_POT), 0, 4095);
+    int previousSmoothedPotValue = smoothedPotValue;
+    smoothedPotValue = (SMOOTHING_FACTOR * newPotValue) + ((1 - SMOOTHING_FACTOR) * smoothedPotValue);
+
+    // Read the Button Value
+    int newButtonValue = !digitalRead(PIN_BLINK_BUTTON) || !digitalRead(PIN_BLINK_BUTTON_2);
+
+    // Update the input values
+    joystickXValue = newJoystickXValue;
+    joystickYValue = newJoystickYValue;
+    potValue = newPotValue;
+    buttonValue = newButtonValue;
 }
 
 /**
- * @brief Checks if the joystick Y value has changed.
- *
- * @return true if the joystick Y value has changed, false otherwise.
+ * @brief Reads the power button state and updates the internal state of the powerButtonPressed and powerButtonDoublePressed flags.
  */
-bool InputHandler::isJoystickYChanged() const {
-    return joystickYValue != prevJoystickYValue;
+void InputHandler::readPowerButton() {
+    bool newPowerButtonState = !digitalRead(PIN_POWER_BUTTON);
+    if (newPowerButtonState && !powerButtonState) {
+        powerButtonPressed = true;
+
+        unsigned long currentTime = millis();
+        if (currentTime - lastPowerButtonPressTime >= 100 && currentTime - lastPowerButtonPressTime <= 500) {
+            powerButtonDoublePressed = true;
+            powerButtonPressed = false;
+        }
+        lastPowerButtonPressTime = currentTime;
+    }
+    powerButtonState = newPowerButtonState;
 }
 
 /**
- * @brief Checks if the potentiometer value has changed.
+ * @brief Applies a deadzone to the joystick value.
  *
- * @return true if the potentiometer value has changed, false otherwise.
+ * @param value The joystick value.
+ * @param deadzone The deadzone threshold.
+ * @return The joystick value with the deadzone applied.
  */
-bool InputHandler::isPotValueChanged() const {
-    return potValue != prevPotValue;
-}
-
-/**
- * @brief Checks if the button value has changed.
- *
- * @return true if the button value has changed, false otherwise.
- */
-bool InputHandler::isButtonValueChanged() const {
-    return buttonValue != prevButtonValue;
+int InputHandler::applyDeadzone(int value, int deadzone) {
+    if (abs(value - 2048) < deadzone) {
+        return 2048;
+    }
+    return value;
 }
 
 /**
@@ -159,86 +199,16 @@ int InputHandler::getSmoothedPotValue() const {
 }
 
 /**
- * @brief Reads the input values from the hardware and updates the internal state.
- */
-void InputHandler::readInputValues() {
-    prevJoystickXValue = joystickXValue;
-    prevJoystickYValue = joystickYValue;
-    prevPotValue = potValue;
-    prevButtonValue = buttonValue;
-
-    // Read the Joystick Values
-    int newJoystickXValue = constrain(analogRead(PIN_JOYSTICK_X) + JOYSTICK_DRIFT_ADUSTMENT_X, 0, 4095);
-    int newJoystickYValue = constrain(analogRead(PIN_JOYSTICK_Y) + JOYSTICK_DRIFT_ADUSTMENT_Y, 0, 4095);
-    // Apply deadzone
-    newJoystickXValue = applyDeadzone(newJoystickXValue, JOYSTICK_DEADZONE);
-    newJoystickYValue = applyDeadzone(newJoystickYValue, JOYSTICK_DEADZONE);
-
-    // Reat the Potentiometer Value
-    int newPotValue = 4095 - constrain(analogRead(PIN_EYELIDS_POT), 0, 4095);
-    int previousSmoothedPotValue = smoothedPotValue;
-    smoothedPotValue = (SMOOTHING_FACTOR * newPotValue) + ((1 - SMOOTHING_FACTOR) * smoothedPotValue);
-
-    // Read the Button Value
-    int newButtonValue = !digitalRead(PIN_BLINK_BUTTON) || !digitalRead(PIN_BLINK_BUTTON_2);
-
-    // Read the Power Button Value
-    bool newPowerButtonState = !digitalRead(PIN_POWER_BUTTON);
-    if (newPowerButtonState && !powerButtonState) {
-        powerButtonPressed = true;
-
-        unsigned long currentTime = millis();
-        if (currentTime - lastPowerButtonPressTime >= 100 && currentTime - lastPowerButtonPressTime <= 500) {
-            powerButtonDoublePressed = true;
-            powerButtonPressed = false;
-        }
-        lastPowerButtonPressTime = currentTime;
-    }
-    powerButtonState = newPowerButtonState;
-
-    // Determine whether the user is manually controlling the input
-    if ((newButtonValue != buttonValue) ||
-        (abs(newJoystickXValue + newJoystickYValue + newPotValue - lastAnalogInputChecksum) > MANUAL_CONTROL_INTERRUPT_THRESHOLD)
-    ) {
-        lastAnalogInputChecksum = newJoystickXValue + newJoystickYValue + newPotValue;
-        lastInputMillis = millis();
-    }
-    timeSinceLastInput = millis() - lastInputMillis;
-
-    // Update the input values
-    joystickXValue = newJoystickXValue;
-    joystickYValue = newJoystickYValue;
-    potValue = newPotValue;
-    buttonValue = newButtonValue;
-}
-
-/**
- * @brief Applies a deadzone to the joystick value.
+ * @brief Gets whether manual control is enabled.
  *
- * @param value The joystick value.
- * @param deadzone The deadzone threshold.
- * @return The joystick value with the deadzone applied.
+ * @return true if manual control is enabled, false otherwise.
  */
-int InputHandler::applyDeadzone(int value, int deadzone) {
-    if (abs(value - 2048) < deadzone) {
-        return 2048;
-    }
-    return value;
+bool InputHandler::isManualControlEnabled() const {
+    return manualControlEnabled;
 }
 
 /**
- * @brief Calculates the time since the last meaningful input.
- *
- * @return unsigned long The time in milliseconds since the last meaningful input.
- */
-unsigned long InputHandler::getTimeSinceLastInput() const {
-    // When manual control is not enabled by default, make sure the time since last input exceeds the timeout.
-    // millis() starts at 0 which yields a false positive
-    return (millis() < MANUAL_CONTROL_TIMEOUT) && !MANUAL_CONTROL_ENABLED_DEFAULT ? MANUAL_CONTROL_TIMEOUT + 1 : timeSinceLastInput;
-}
-
-/**
- * @brief Checks if the power button is pressed.
+ * @brief Checks if the power button is pressed. Resets the pressed state after reading.
  *
  * @return true if the power button is pressed, false otherwise.
  */
@@ -251,7 +221,7 @@ bool InputHandler::isPowerButtonPressed() {
 }
 
 /**
- * @brief Checks if the power button is double pressed.
+ * @brief Checks if the power button is double pressed. Resets the double pressed state after reading.
  *
  * @return true if the power button is double pressed, false otherwise.
  */
@@ -264,6 +234,14 @@ bool InputHandler::isPowerButtonDoublePressed() {
 }
 
 /**
+ * @brief Gets the time since the last input was received.
+ */
+int InputHandler::getManualControlDisabledSinceMillis() const {
+    return manualControlDisabledSinceMillis;
+}
+
+#ifdef SERIAL_DEBUG
+/**
  * @brief Prints the current input values for debugging purposes.
  */
 void InputHandler::printDebugValues() {
@@ -273,3 +251,4 @@ void InputHandler::printDebugValues() {
             joystickXValue, joystickYValue, potValue, buttonValue, powerButtonPressed, powerButtonDoublePressed, timeSinceLastInput);
     Serial.print(inputBuffer);
 }
+#endif

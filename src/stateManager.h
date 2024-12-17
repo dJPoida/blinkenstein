@@ -12,36 +12,50 @@
 
 #include <Arduino.h>
 #include "inputHandler.h"
-#include "brain.h"
 
 class StateManager {
 public:
-    StateManager(InputHandler& inputHandler, Brain& brain);
+    StateManager(InputHandler& inputHandler);
 
+    void begin();
     void update();
 
-    int getPowerState() const;
-    void setPowerState(int state);
+    bool getPowerState() const;
+    void setPowerState(bool state);
 
     int getPanState() const;
     int getTiltState() const;
     int getTopLidState() const;
     int getBottomLidState() const;
 
+    #ifdef SERIAL_DEBUG
     void printDebugValues();
+    #endif
+
 private:
     InputHandler& inputHandler;
-    Brain& brain;
 
-    int powerState;
+    bool powerState;
 
     int panState;
     int tiltState;
+    int panTwitchOffset;
+    int tiltTwitchOffset;
     int topLidState;
     int bottomLidState;
 
-    bool manualControl;
-};
+    bool sleeping;
+
+    int autoEyelidsState;
+    bool autoBlinkState;
+
+    unsigned long previousAutoUpdateMillis;
+    unsigned long perviousAutoBlinkMillis;
+
+    bool checkPowerState();
+    void randomizeStates(int& newPanState, int& newTiltState, int& newTopLidState, int& newBottomLidState, int& newAutoEyelidsState, bool& newAutoBlinkState);
+    void powerDown();
+};;
 
 extern StateManager stateManager;
 

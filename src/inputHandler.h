@@ -54,7 +54,8 @@ private:
     bool prevButtonValue;
 
     unsigned long timeSinceLastInput;
-    unsigned long timeSinceLastInputMillis;
+    unsigned long lastInputMillis;
+    int lastAnalogInputChecksum;
 
     bool powerButtonState;
     unsigned long lastPowerButtonPressTime;

@@ -7,13 +7,13 @@
  */
 
 // Uncomment the following line to enable debug output
-#define SERIAL_DEBUG
+// #define SERIAL_DEBUG
 
 // Debug Config
 #define DEBUG_INTERVAL 50       // How often the debug information should be printed to the serial monitor (ms)
-#define DEBUG_INPUT     1       // Output the input values to the serial monitor
+#define DEBUG_INPUT     0       // Output the input values to the serial monitor
 #define DEBUG_BRAIN     0       // Output the brain values to the serial monitor
-#define DEBUG_STATE     1       // Output the state values to the serial monitor
+#define DEBUG_STATE     0       // Output the state values to the serial monitor
 #define DEBUG_SERVOS    0       // Output the servo values to the serial monitor
 
 // ESP Pin definitions
@@ -63,14 +63,14 @@
 // When should manual control be enabled
 #define MANUAL_CONTROL_ENABLED_DEFAULT 0         // Enable manual control by default
 #define MANUAL_CONTROL_INTERRUPT_THRESHOLD 1000  // What change in value on the analog inputs will trigger manual control
-#define MANUAL_CONTROL_TIMEOUT 30000             // How long to wait before reverting to autonomous control (ms)
+#define MANUAL_CONTROL_TIMEOUT 10000             // How long to wait before reverting to autonomous control (ms)
 
 #define BRAIN_UPDATE_INTERVAL 100               // How often the brain should consider changing the states (ms)
 #define BRAIN_MAX_CHANCE 100                    // The maximum chance value for random events
 #define BRAIN_CHANCE_OF_BLINK 2                 // The chance of performing a blink (0 -> BRAIN_MAX_CHANCE)
 #define BRAIN_CHANCE_OF_EYELID_CHANGE 1         // The chance of the eyelids changing (0 -> BRAIN_MAX_CHANCE)
-#define BRAIN_CHANCE_OF_MAJOR_LOOK_CHANGE 2    // The chance of the eyeballs changing direction slightly (0 -> BRAIN_MAX_CHANCE)
-#define BRAIN_CHANCE_OF_MINOR_LOOK_CHANGE 10     // The chance of the eyeballs changing direction in a large way (0 -> BRAIN_MAX_CHANCE)
+#define BRAIN_CHANCE_OF_MAJOR_LOOK_CHANGE 2     // The chance of the eyeballs changing direction slightly (0 -> BRAIN_MAX_CHANCE)
+#define BRAIN_CHANCE_OF_MINOR_LOOK_CHANGE 10    // The chance of the eyeballs changing direction in a large way (0 -> BRAIN_MAX_CHANCE)
 #define BRAIN_CHANCE_OF_LOOK_RETURN_CENTRE 25   // The chance of the eyeballs returning to the centre (0 -> BRAIN_MAX_CHANCE)
 #define BRAIN_CHANCE_OF_BLINK_WHILE_LOOK 25     // The chance of blinking while looking around (0 -> BRAIN_MAX_CHANCE)
 

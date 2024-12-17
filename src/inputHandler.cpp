@@ -19,8 +19,9 @@ InputHandler::InputHandler():
     prevPotValue(0),
     prevButtonValue(false),
     smoothedPotValue(0),
-    timeSinceLastInput(MANUAL_CONTROL_ENABLED_DEFAULT ? 0 : MANUAL_CONTROL_TIMEOUT),
-    timeSinceLastInputMillis(0),
+    timeSinceLastInput(MANUAL_CONTROL_ENABLED_DEFAULT ? MANUAL_CONTROL_TIMEOUT + 1 : 0),
+    lastInputMillis(0),
+    lastAnalogInputChecksum(0),
     powerButtonState(false),
     lastPowerButtonPressTime(0),
     powerButtonDoublePressed(false)
@@ -181,14 +182,8 @@ void InputHandler::readInputValues() {
     // Read the Button Value
     int newButtonValue = !digitalRead(PIN_BLINK_BUTTON) || !digitalRead(PIN_BLINK_BUTTON_2);
 
-    // When the user triggers the blink button, capture that they are interacting with the device
-    if (newButtonValue != buttonValue) {
-        timeSinceLastInputMillis = millis();
-    }
-    timeSinceLastInput = millis() - timeSinceLastInputMillis;
-
+    // Read the Power Button Value
     bool newPowerButtonState = !digitalRead(PIN_POWER_BUTTON);
-
     if (newPowerButtonState && !powerButtonState) {
         powerButtonPressed = true;
 
@@ -200,6 +195,15 @@ void InputHandler::readInputValues() {
         lastPowerButtonPressTime = currentTime;
     }
     powerButtonState = newPowerButtonState;
+
+    // Determine whether the user is manually controlling the input
+    if ((newButtonValue != buttonValue) ||
+        (abs(newJoystickXValue + newJoystickYValue + newPotValue - lastAnalogInputChecksum) > MANUAL_CONTROL_INTERRUPT_THRESHOLD)
+    ) {
+        lastAnalogInputChecksum = newJoystickXValue + newJoystickYValue + newPotValue;
+        lastInputMillis = millis();
+    }
+    timeSinceLastInput = millis() - lastInputMillis;
 
     // Update the input values
     joystickXValue = newJoystickXValue;
@@ -228,7 +232,9 @@ int InputHandler::applyDeadzone(int value, int deadzone) {
  * @return unsigned long The time in milliseconds since the last meaningful input.
  */
 unsigned long InputHandler::getTimeSinceLastInput() const {
-    return timeSinceLastInput;
+    // When manual control is not enabled by default, make sure the time since last input exceeds the timeout.
+    // millis() starts at 0 which yields a false positive
+    return (millis() < MANUAL_CONTROL_TIMEOUT) && !MANUAL_CONTROL_ENABLED_DEFAULT ? MANUAL_CONTROL_TIMEOUT + 1 : timeSinceLastInput;
 }
 
 /**
@@ -263,7 +269,7 @@ bool InputHandler::isPowerButtonDoublePressed() {
 void InputHandler::printDebugValues() {
     char inputBuffer[256];
     snprintf(inputBuffer, sizeof(inputBuffer),
-            "INPUT: [JOY_X: %4d | JOY_Y: %4d | POT: %4d | BUTTON: %d | PWR: %d | PWR2: %d] ",
-            joystickXValue, joystickYValue, potValue, buttonValue, powerButtonPressed, powerButtonDoublePressed);
+            "INPUT: [JOY_X: %4d | JOY_Y: %4d | POT: %4d | BUTTON: %d | PWR: %d | PWR2: %d | TSLI : %6d] ",
+            joystickXValue, joystickYValue, potValue, buttonValue, powerButtonPressed, powerButtonDoublePressed, timeSinceLastInput);
     Serial.print(inputBuffer);
 }

@@ -9,7 +9,7 @@
 #define CONFIG_H
 
 // Uncomment the following line to enable debug output
-#define SERIAL_DEBUG
+// #define SERIAL_DEBUG
 
 // Debug Config
 #define DEBUG_INTERVAL  100     // How often the debug information should be printed to the serial monitor (ms)
@@ -73,19 +73,19 @@
 #define AUTO_CHANCE_OF_BLINK 15                // The chance of performing a blink (0 -> AUTO_MAX_CHANCE)
 #define AUTO_CHANCE_OF_EYELID_CHANGE 10        // The chance of the eyelids changing (0 -> AUTO_MAX_CHANCE)
 #define AUTO_CHANCE_OF_MAJOR_LOOK_CHANGE 20    // The chance of the eyeballs changing direction in a large way (0 -> AUTO_MAX_CHANCE)
-#define AUTO_CHANCE_OF_LOOK_RETURN_CENTRE 250  // The chance of the eyeballs returning to the centre (0 -> AUTO_MAX_CHANCE)
+#define AUTO_CHANCE_OF_LOOK_RETURN_CENTRE 100  // The chance of the eyeballs returning to the centre (0 -> AUTO_MAX_CHANCE)
 #define AUTO_CHANCE_OF_BLINK_WHILE_LOOK 500    // The chance of blinking while looking around (0 -> AUTO_MAX_CHANCE)
 #define AUTO_SQUINT_POSITION_COUNT 5           // The number of eyelid squint positions to choose from
 #define AUTO_LOOK_PAN_POSITION_COUNT 7         // The number of eye pan positions to choose from
 #define AUTO_LOOK_TILT_POSITION_COUNT 5        // The number of eye tilt positions to choose from
 #define AUTO_BLINK_DURATION 150                // How long the blink should last (when under autonomous control) (ms)
-#define AUTO_CHANCE_OF_LOOK_TWITCH 5           // The chance of the eyeballs changing direction slightly to emulate realism (0 -> AUTO_MAX_CHANCE)
-#define AUTO_LOOK_TWITCH_AMOUNT 12             // The amount of twitch to apply to the eyeballs (0 -> 100)
+#define AUTO_CHANCE_OF_LOOK_TWITCH 10          // The chance of the eyeballs changing direction slightly to emulate realism (0 -> AUTO_MAX_CHANCE)
+#define AUTO_LOOK_TWITCH_AMOUNT 15             // The amount of twitch to apply to the eyeballs (0 -> 100)
 
 // Define auto positions
-const int AUTO_SQUINT_POSITIONS[AUTO_SQUINT_POSITION_COUNT] = {0, 25, 40, 60, 85};
+const int AUTO_SQUINT_POSITIONS[AUTO_SQUINT_POSITION_COUNT] = {10, 35, 50, 65, 100};
 const int AUTO_LOOK_PAN_POSITIONS[AUTO_LOOK_PAN_POSITION_COUNT] = {-100, -75, -30, 0, 30, 75, 100};
-const int AUTO_LOOK_TILT_POSITIONS[AUTO_LOOK_TILT_POSITION_COUNT] = {-100, -50, 0, 50, 100};
+const int AUTO_LOOK_TILT_POSITIONS[AUTO_LOOK_TILT_POSITION_COUNT] = {-90, -50, 0, 50, 90};
 
 // Prevent the pupil from be obscured by the eyelids
 #define PUPIL_REVEAL_LID_MIN_AMOUNT 20

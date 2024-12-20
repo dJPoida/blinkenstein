@@ -170,7 +170,7 @@ void StateManager::randomizeStates(int& newPanState, int& newTiltState, int& new
         #endif
     }
 
-    else if (random(0, AUTO_MAX_CHANCE) < AUTO_CHANCE_OF_EYELID_CHANGE) {
+    if (random(0, AUTO_MAX_CHANCE) < AUTO_CHANCE_OF_EYELID_CHANGE) {
         newAutoEyelidsState = AUTO_SQUINT_POSITIONS[random(0, AUTO_SQUINT_POSITION_COUNT)];
 
         #ifdef SERIAL_DEBUG
@@ -178,7 +178,7 @@ void StateManager::randomizeStates(int& newPanState, int& newTiltState, int& new
         #endif
     }
 
-    else if (random(0, AUTO_MAX_CHANCE) < AUTO_CHANCE_OF_BLINK) {
+    if (random(0, AUTO_MAX_CHANCE) < AUTO_CHANCE_OF_BLINK) {
         newAutoBlinkState = 1;
 
         #ifdef SERIAL_DEBUG

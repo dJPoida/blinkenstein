@@ -2,6 +2,8 @@
 
 Yet another arduino control codebase for the [Simplified 3D Printed Animatronic Dual Eye Mechanism](https://www.instructables.com/Simplified-3D-Printed-Animatronic-Dual-Eye-Mechani)
 
+![Blinkenstein](docs/images/blinkenstein.jpg)
+
 ## Capabilities & Features
 Manual Control
   - Pan (Joystick X Axis )
